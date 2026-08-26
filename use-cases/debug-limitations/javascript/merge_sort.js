@@ -24,10 +24,10 @@ function merge(left, right) {
         }
     }
 
-    // Bug: Only one of these loops will execute
+    // Copy any remaining elements from the left half.
     while (i < left.length) {
         result.push(left[i]);
-        j++; // Bug: incrementing j instead of i
+        i++; // FIX: advance the left index (the original code incremented j, causing an infinite loop / dropped elements)
     }
 
     while (j < right.length) {

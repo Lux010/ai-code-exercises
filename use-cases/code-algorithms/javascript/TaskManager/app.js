@@ -2,11 +2,27 @@
 const { Task, TaskPriority, TaskStatus } = require('./models');
 const { TaskStorage } = require('./storage');
 
+/**
+ * High-level task operations. A thin façade over {@link TaskStorage} that also computes
+ * statistics. All persistence goes through the injected `storage`.
+ */
 class TaskManager {
+  /**
+   * @param {string} [storagePath='tasks.json'] - Path to the JSON backing store.
+   */
   constructor(storagePath = 'tasks.json') {
     this.storage = new TaskStorage(storagePath);
   }
 
+  /**
+   * Create and persist a new task.
+   * @param {string} title - Task title.
+   * @param {string} [description=''] - Task description.
+   * @param {number} [priorityValue=2] - Priority (1-4, see TaskPriority).
+   * @param {string|null} [dueDateStr=null] - Due date as `YYYY-MM-DD`.
+   * @param {string[]} [tags=[]] - Initial tags.
+   * @returns {string|null} The new task id, or null if the date string is invalid.
+   */
   createTask(title, description = "", priorityValue = 2, dueDateStr = null, tags = []) {
     const priority = priorityValue;
     let dueDate = null;
@@ -105,6 +121,10 @@ class TaskManager {
     return false;
   }
 
+  /**
+   * Aggregate counts/metrics over all tasks.
+   * @returns {{total:number,byStatus:Object,byPriority:Object,overdue:number,completedLastWeek:number}}
+   */
   getStatistics() {
     const tasks = this.storage.getAllTasks();
     const total = tasks.length;

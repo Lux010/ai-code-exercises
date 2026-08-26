@@ -3,11 +3,15 @@ function renderUserList(users) {
   const userListElement = document.getElementById('user-list');
   userListElement.innerHTML = '';
 
-  // Loop through users, up to a maximum of 5
-  for (let i = 0; i < 5; i++) {
+  // Loop through users, up to a maximum of 5.
+  // BUG FIX: the original `for (let i = 0; i < 5; i++)` always iterated to 5 even when
+  // fewer users existed, so `users[i]` was `undefined` on the last iterations and
+  // `user.name` threw a "Cannot read properties of undefined" (index-out-of-bounds) error.
+  // We now bound the loop by the actual number of users.
+  const count = Math.min(users.length, 5);
+  for (let i = 0; i < count; i++) {
     const user = users[i];
 
-    // Now safe because we only process existing users
     const userName = user.name;
     const userEmail = user.email;
 

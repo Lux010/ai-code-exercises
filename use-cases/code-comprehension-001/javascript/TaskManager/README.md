@@ -1,228 +1,85 @@
 # Task Manager CLI
 
-A command-line interface for managing tasks with features for creating, updating, listing, and analyzing tasks.
+A command-line task manager for developers: create, track, prioritize, and analyze tasks
+without leaving the terminal. Tasks are stored locally in a `tasks.json` file.
 
-## Prerequisites
+## Features
 
-- Node.js (v12 or higher recommended)
-- npm (comes with Node.js)
+- **Task lifecycle:** create, update status, set priority/due date, add/remove tags, delete.
+- **Priorities:** `1` LOW, `2` MEDIUM (default), `3` HIGH, `4` URGENT.
+- **Statuses:** `todo`, `in_progress`, `review`, `done`.
+- **Tags** for cross-cutting organization.
+- **Statistics:** totals, by-status, by-priority, overdue count, completed-in-last-7-days.
+- **Local persistence** in `tasks.json` — no server or database required.
+- **Algorithm modules:** two-way list merge, free-text parser, importance scoring.
 
 ## Installation
 
-1. Clone this repository or download the source code
-2. Navigate to the project directory
-3. Install dependencies:
+### Prerequisites
+- Node.js v12+ and npm.
 
+### Install & run
 ```bash
+cd use-cases/code-comprehension-001/javascript/TaskManager
 npm install
+node cli.js --help
 ```
 
-This will install the required dependencies:
-- commander: For command-line interface
-- uuid: For generating unique IDs
-
-## Running the CLI
-
-The main entry point is `cli.js`. You can run it directly with Node.js:
+## Usage
 
 ```bash
-node cli.js [command] [options]
-```
+# Create a task (with priority, due date, tags)
+node cli.js create "Finish report" -p 3 -u 2023-12-31 -t "work,report"
 
-For convenience, you can make the script executable (on Unix-based systems):
-
-```bash
-chmod +x cli.js
-./cli.js [command] [options]
-```
-
-Running the script without any commands will display the help menu.
-
-## Available Commands
-
-### Create a new task
-
-```bash
-node cli.js create <title> [options]
-```
-
-Options:
-- `-d, --description <description>`: Task description (default: empty)
-- `-p, --priority <priority>`: Task priority (1-4, where 1=LOW, 2=MEDIUM, 3=HIGH, 4=URGENT) (default: 2)
-- `-u, --due <due_date>`: Due date in YYYY-MM-DD format
-- `-t, --tags <tags>`: Comma-separated list of tags
-
-Example:
-```bash
-node cli.js create "Complete project" -d "Finish the task manager project" -p 3 -u 2023-12-31 -t "work,coding,important"
-```
-
-### List tasks
-
-```bash
-node cli.js list [options]
-```
-
-Options:
-- `-s, --status <status>`: Filter by status (todo, in_progress, review, done)
-- `-p, --priority <priority>`: Filter by priority (1-4)
-- `-o, --overdue`: Show only overdue tasks
-
-Examples:
-```bash
-# List all tasks
+# List tasks (all / by status / by priority / overdue only)
 node cli.js list
-
-# List only tasks with "todo" status
-node cli.js list -s todo
-
-# List high priority tasks
-node cli.js list -p 3
-
-# List overdue tasks
+node cli.js list -s in_progress
+node cli.js list -p 4
 node cli.js list -o
-```
 
-### Update task status
+# Update status / priority / due date
+node cli.js status <task_id> done
+node cli.js priority <task_id> 2
+node cli.js due <task_id> 2023-12-31
 
-```bash
-node cli.js status <task_id> <status>
-```
+# Tags
+node cli.js tag <task_id> urgent
+node cli.js untag <task_id> urgent
 
-Available statuses:
-- `todo`: Task not started
-- `in_progress`: Task in progress
-- `review`: Task waiting for review
-- `done`: Task completed
-
-Example:
-```bash
-node cli.js status abc123 in_progress
-```
-
-### Update task priority
-
-```bash
-node cli.js priority <task_id> <priority>
-```
-
-Available priorities:
-- `1`: LOW
-- `2`: MEDIUM
-- `3`: HIGH
-- `4`: URGENT
-
-Example:
-```bash
-node cli.js priority abc123 3
-```
-
-### Update task due date
-
-```bash
-node cli.js due <task_id> <due_date>
-```
-
-Example:
-```bash
-node cli.js due abc123 2023-12-31
-```
-
-### Add tag to task
-
-```bash
-node cli.js tag <task_id> <tag>
-```
-
-Example:
-```bash
-node cli.js tag abc123 important
-```
-
-### Remove tag from task
-
-```bash
-node cli.js untag <task_id> <tag>
-```
-
-Example:
-```bash
-node cli.js untag abc123 important
-```
-
-### Show task details
-
-```bash
+# Inspect / delete / stats
 node cli.js show <task_id>
-```
-
-Example:
-```bash
-node cli.js show abc123
-```
-
-### Delete a task
-
-```bash
 node cli.js delete <task_id>
-```
-
-Example:
-```bash
-node cli.js delete abc123
-```
-
-### Show task statistics
-
-```bash
 node cli.js stats
 ```
 
-This command displays:
-- Total number of tasks
-- Tasks by status
-- Tasks by priority
-- Number of overdue tasks
-- Number of tasks completed in the last 7 days
+## Configuration
 
-## Running Tests
+There is no external configuration file. Behaviour is controlled by CLI flags:
+`-d/--description`, `-p/--priority` (1–4), `-u/--due` (`YYYY-MM-DD`), `-t/--tags`
+(comma-separated). Tasks are persisted to `tasks.json` in the current working directory
+(created automatically on first task).
 
-The project includes a comprehensive test suite built with Jest. The tests cover all major components of the application:
+## Troubleshooting
 
-- Task model tests
-- TaskManager tests
-- TaskStorage tests
-- Integration tests
+- **`command not found` / `node: command not found`** — ensure Node.js is installed and on
+  your PATH (`node --version`).
+- **"Invalid date format. Use YYYY-MM-DD"** — the `-u`/`due` value must be `YYYY-MM-DD`
+  (e.g. `2023-12-31`); other formats are rejected.
+- **"Task not found" / "Failed to update task status"** — you passed a wrong or truncated
+  task id. Use `node cli.js list` or `node cli.js show <id>` to copy the correct id.
+- **`tasks.json` seems wrong / empty** — the whole file is rewritten on every change; if a
+  write was interrupted you may have a partial file. Restore from backup or delete it to
+  start fresh (this loses tasks).
+- **Tests fail / act on real data** — tests use a temp `tasks.json` path; run `npm test` from
+  the project directory and don't run the CLI with the same cwd the tests use.
 
-### Running All Tests
+## Contributing
 
-To run all tests, use the following command:
+1. Fork the repository and create a feature branch.
+2. `npm install` and `npm test` before committing.
+3. Add/update tests for any behaviour change.
+4. Open a pull request describing the change.
 
-```bash
-npm test
-```
+## License
 
-### Running Specific Test Files
-
-To run a specific test file, you can use the Jest CLI with the file path:
-
-```bash
-npx jest tests/task.test.js       # Run only Task model tests
-npx jest tests/taskManager.test.js # Run only TaskManager tests
-npx jest tests/taskStorage.test.js # Run only TaskStorage tests
-npx jest tests/taskManagerIntegration.test.js # Run only integration tests
-```
-
-### Running Tests with Coverage
-
-To run tests with coverage reporting, use:
-
-```bash
-npx jest --coverage
-```
-
-This will generate a detailed coverage report showing which parts of the code are covered by tests.
-
-## Data Storage
-
-Tasks are stored in a JSON file named `tasks.json` in the project directory. This file is created automatically when you add your first task.
+MIT License.

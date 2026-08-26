@@ -187,20 +187,33 @@ This command displays:
 
 ## Running Tests
 
-The project includes a comprehensive test suite built with Jest. The tests cover all major components of the application:
+The project includes a comprehensive test suite built with Jest (the **Testing** exercise
+deliverable). The tests cover all major components of the application:
 
-- Task model tests
-- TaskManager tests
-- TaskStorage tests
-- Integration tests
+- Task model tests (`tests/task.test.js`)
+- TaskManager tests (`tests/taskManager.test.js`)
+- TaskStorage tests (`tests/taskStorage.test.js`)
+- Integration tests (`tests/taskManagerIntegration.test.js`)
+- Algorithm tests: `tests/task_list_merge.test.js`, `tests/task_parser.test.js`,
+  `tests/task_priority.test.js`
 
 ### Running All Tests
 
-TODO
+```bash
+npm test
+```
 
 ### Running Specific Test Files
 
-TODO
+```bash
+npx jest tests/task.test.js
+npx jest tests/taskManager.test.js
+npx jest tests/taskStorage.test.js
+npx jest tests/taskManagerIntegration.test.js
+npx jest tests/task_list_merge.test.js
+npx jest tests/task_parser.test.js
+npx jest tests/task_priority.test.js
+```
 
 ## Data Storage
 

@@ -106,6 +106,8 @@ async function initializeDatabase() {
     await client.query(`
       CREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);
       CREATE INDEX idx_order_items_order ON order_items(order_id);
+      CREATE INDEX idx_order_items_product ON order_items(product_id);
+      CREATE INDEX idx_status_history_order ON order_status_history(order_id);
       CREATE INDEX idx_products_id ON products(product_id);
     `);
     

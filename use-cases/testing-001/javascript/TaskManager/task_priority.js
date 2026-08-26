@@ -1,6 +1,6 @@
 const {TaskPriority, TaskStatus} = require("./models");
 
-function calculateTaskScore(task) {
+function calculateTaskScore(task, currentUser) {
   // Base priority weights
   const priorityWeights = {
     [TaskPriority.LOW]: 1,
@@ -39,6 +39,11 @@ function calculateTaskScore(task) {
   // Boost score for tasks with certain tags
   if (task.tags.some(tag => ["blocker", "critical", "urgent"].includes(tag))) {
     score += 8;
+  }
+
+  // Boost score for tasks assigned to the current user (TDD feature, Exercise 3.1)
+  if (currentUser && task.assignee === currentUser) {
+    score += 12;
   }
 
   // Boost score for recently updated tasks

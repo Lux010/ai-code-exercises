@@ -15,8 +15,12 @@ function initApp() {
 
 // Function to add a new task
 function addTask(taskName) {
-  let tasks = { id: Date.now(), name: taskName, completed: false };  // Notice the 'let tasks' here!
-  console.log("Task added:", tasks);
+  // BUG FIX: the original code declared a *local* `let tasks` object that shadowed the
+  // module-level `tasks` array, so the new task was never added to the list (and the
+  // function returned an object instead of the array the tests expect).
+  const newTask = { id: Date.now(), name: taskName, completed: false };
+  tasks.push(newTask);
+  console.log("Task added:", newTask);
   displayTasks();
   return tasks; // Return for testing
 }

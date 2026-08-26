@@ -1,21 +1,19 @@
 const { TaskStatus } = require("./models");
 
+/**
+ * Merge two task lists with conflict resolution (two-way sync).
+ *
+ * @param {Object<string, object>} localTasks - Map of taskId -> Task from the local source.
+ * @param {Object<string, object>} remoteTasks - Map of taskId -> Task from the remote source.
+ * @returns {{
+ *   mergedTasks: Object<string, object>,
+ *   toCreateRemote: Object<string, object>,
+ *   toUpdateRemote: Object<string, object>,
+ *   toCreateLocal: Object<string, object>,
+ *   toUpdateLocal: Object<string, object>
+ * }} Combined tasks plus the deltas that must be written back to each side.
+ */
 function mergeTaskLists(localTasks, remoteTasks) {
-  /**
-   * Merge two task lists with conflict resolution.
-   *
-   * Args:
-   *   localTasks: Object of tasks from local source {task_id: task}
-   *   remoteTasks: Object of tasks from remote source {task_id: task}
-   *
-   * Returns:
-   *   Object with:
-   *     - mergedTasks: Combined tasks
-   *     - toCreateRemote: Tasks to be created in remote
-   *     - toUpdateRemote: Tasks to be updated in remote
-   *     - toCreateLocal: Tasks to be created in local
-   *     - toUpdateLocal: Tasks to be updated in local
-   */
   const mergedTasks = {};
   const toCreateRemote = {};
   const toUpdateRemote = {};
@@ -68,13 +66,18 @@ function mergeTaskLists(localTasks, remoteTasks) {
   };
 }
 
+/**
+ * Resolve a conflict between two versions of the same task.
+ *
+ * Strategy: start from the local task, let the most-recently-updated side win for most
+ * fields, give a completed status precedence, and union the tags.
+ *
+ * @param {object} localTask - Local version of the task.
+ * @param {object} remoteTask - Remote version of the task.
+ * @returns {[object, boolean, boolean]} Tuple of
+ *   `[mergedTask, shouldUpdateLocal, shouldUpdateRemote]`.
+ */
 function resolveTaskConflict(localTask, remoteTask) {
-  /**
-   * Resolve conflicts between two versions of the same task.
-   *
-   * Returns:
-   *   [mergedTask, shouldUpdateLocal, shouldUpdateRemote]
-   */
   // Make a copy of the local task to use as our base
   const mergedTask = {...localTask};
 
@@ -135,7 +138,13 @@ function resolveTaskConflict(localTask, remoteTask) {
   return [mergedTask, shouldUpdateLocal, shouldUpdateRemote];
 }
 
-// Helper function to compare arrays
+/**
+ * Compare two arrays for equality after sorting their elements.
+ *
+ * @param {Array} a - First array.
+ * @param {Array} b - Second array.
+ * @returns {boolean} True when both arrays contain the same elements (order-independent).
+ */
 function arraysEqual(a, b) {
   if (a.length !== b.length) return false;
   const sortedA = [...a].sort();

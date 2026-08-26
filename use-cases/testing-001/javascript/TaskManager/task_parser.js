@@ -52,8 +52,8 @@ function parseTaskFromText(text) {
   // Remove all tags from the title
   title = title.replace(/\s@\w+/g, '');
 
-  // Extract date markers (#date)
-  const dateRegex = /\s#(\w+)/g;
+  // Extract date markers (#date). Allow hyphens so "YYYY-MM-DD" tokens are captured whole.
+  const dateRegex = /\s#([\w-]+)/g;
   const dates = [];
   let dateMatch;
   while ((dateMatch = dateRegex.exec(text)) !== null) {
@@ -62,7 +62,7 @@ function parseTaskFromText(text) {
   }
 
   // Remove all date markers from the title
-  title = title.replace(/\s#\w+/g, '');
+  title = title.replace(/\s#[\w-]+/g, '');
 
   // Try to parse date references
   if (dates.length > 0) {

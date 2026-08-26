@@ -1,21 +1,21 @@
 const {TaskPriority, Task} = require("./models");
 
+/**
+ * Parse free-form text into a structured Task.
+ *
+ * Supported shorthand (first `!` and first `#` token win):
+ * - `@tag` → adds a tag (can repeat)
+ * - `!N` or `!low|medium|high|urgent` → sets priority
+ * - `#date` → sets due date; accepts `today`, `tomorrow`, `next_week`,
+ *   weekday names (e.g. `fri`), or `YYYY-MM-DD`
+ *
+ * @param {string} text - Free-form task description, e.g. `"Buy milk @shop !2 #tomorrow"`.
+ * @returns {object} A `Task` instance with `title`, `priority`, `dueDate`, and `tags` set.
+ *
+ * @example
+ * parseTaskFromText("Finish report !urgent #fri #work @project")
+ */
 function parseTaskFromText(text) {
-  /**
-   * Parse free-form text to extract task properties.
-   *
-   * Examples of format it can parse:
-   * "Buy milk @shopping !2 #tomorrow"
-   * "Finish report for client XYZ !urgent #friday #work @project"
-   *
-   * Where:
-   * - Basic text is the task title
-   * - @tag adds a tag
-   * - !N sets priority (1=low, 2=medium, 3=high, 4=urgent)
-   * - !urgent/!high/!medium/!low sets priority by name
-   * - #date sets a due date
-   */
-
   // Default task properties
   let title = text.trim();
   let priority = TaskPriority.MEDIUM;
@@ -52,8 +52,8 @@ function parseTaskFromText(text) {
   // Remove all tags from the title
   title = title.replace(/\s@\w+/g, '');
 
-  // Extract date markers (#date)
-  const dateRegex = /\s#(\w+)/g;
+  // Extract date markers (#date). Allow hyphens so "YYYY-MM-DD" tokens are captured whole.
+  const dateRegex = /\s#([\w-]+)/g;
   const dates = [];
   let dateMatch;
   while ((dateMatch = dateRegex.exec(text)) !== null) {
@@ -62,7 +62,7 @@ function parseTaskFromText(text) {
   }
 
   // Remove all date markers from the title
-  title = title.replace(/\s#\w+/g, '');
+  title = title.replace(/\s#[\w-]+/g, '');
 
   // Try to parse date references
   if (dates.length > 0) {
@@ -131,6 +131,15 @@ function parseTaskFromText(text) {
   return task;
 }
 
+/**
+ * Compute the next calendar occurrence of a given weekday at/after `currentDate`.
+ *
+ * If `currentDate` already falls on `targetDay`, the result is pushed to the following week.
+ *
+ * @param {Date} currentDate - The reference date.
+ * @param {number} targetDay - Target weekday (0=Sun … 6=Sat).
+ * @returns {Date} The next matching weekday (midnight, date-only semantics).
+ */
 function getNextWeekday(currentDate, targetDay) {
   // Get the next occurrence of a specific weekday
   const result = new Date(currentDate);
